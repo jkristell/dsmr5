@@ -33,22 +33,22 @@ pub enum OBIS<'a> {
     Version(OctetString<'a>),
     DateTime(TST),
     EquipmentIdentifier(OctetString<'a>),
-    MeterReadingTo(Tariff, UFixedDouble),
-    MeterReadingBy(Tariff, UFixedDouble),
+    MeterReadingTo(Tariff, UFixedDouble<'a>),
+    MeterReadingBy(Tariff, UFixedDouble<'a>),
 
     /// Current Tariff applicable as reported by the meter.
     /// Note that the format of this string is not defined in the requirements.
     /// Check what your meter emits in practice.
     TariffIndicator(OctetString<'a>),
-    PowerDelivered(UFixedDouble),
+    PowerDelivered(UFixedDouble<'a>),
 
-    TotalDelivered(UFixedDouble),
-    TotalReceived(UFixedDouble),
-    TotalReactiveDelived(UFixedDouble),
-    TotalReactiveReceived(UFixedDouble),
+    TotalDelivered(UFixedDouble<'a>),
+    TotalReceived(UFixedDouble<'a>),
+    TotalReactiveDelived(UFixedDouble<'a>),
+    TotalReactiveReceived(UFixedDouble<'a>),
 
 
-    PowerReceived(UFixedDouble),
+    PowerReceived(UFixedDouble<'a>),
     PowerFailures(UFixedInteger),
     LongPowerFailures(UFixedInteger),
     PowerFailureEventLog, // TODO
@@ -56,13 +56,13 @@ pub enum OBIS<'a> {
     TextMessageCode,      // TODO
     VoltageSags(Line, UFixedInteger),
     VoltageSwells(Line, UFixedInteger),
-    InstantaneousVoltage(Line, UFixedDouble),
+    InstantaneousVoltage(Line, UFixedDouble<'a>),
     InstantaneousCurrent(Line, UFixedInteger),
-    InstantaneousActivePowerPlus(Line, UFixedDouble),
-    InstantaneousActivePowerNeg(Line, UFixedDouble),
+    InstantaneousActivePowerPlus(Line, UFixedDouble<'a>),
+    InstantaneousActivePowerNeg(Line, UFixedDouble<'a>),
     SlaveDeviceType(Slave, UFixedInteger),
     SlaveEquipmentIdentifier(Slave, OctetString<'a>),
-    SlaveMeterReading(Slave, TST, UFixedDouble),
+    SlaveMeterReading(Slave, TST, UFixedDouble<'a>),
 }
 
 impl<'a> OBIS<'a> {
@@ -96,7 +96,7 @@ impl<'a> OBIS<'a> {
                 UFixedDouble::parse(body, 9, 3)?,
             )),
             "0-0:96.14.0" => Ok(OBIS::TariffIndicator::<'a>(OctetString::parse(body, 4)?)),
-            "1-0:1.7.0" => Ok(OBIS::PowerDelivered(UFixedDouble::parse(body, 5, 3)?)),
+            "1-0:1.7.0" => Ok(OBIS::PowerDelivered(UFixedDouble::parse(body, 7, 3)?)),
             "1-0:2.7.0" => Ok(OBIS::PowerReceived(UFixedDouble::parse(body, 5, 3)?)),
             "0-0:96.7.21" => Ok(OBIS::PowerFailures(UFixedInteger::parse(body, 5)?)),
             "0-0:96.7.9" => Ok(OBIS::LongPowerFailures(UFixedInteger::parse(body, 5)?)),

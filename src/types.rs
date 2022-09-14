@@ -78,15 +78,20 @@ impl TST {
     }
 }
 
+
+
 /// Fixed length unsigned doubles as defined by tag 6.
 #[derive(Debug, Serialize, Deserialize)]
-pub struct UFixedDouble {
+pub struct UFixedDouble<'a> {
     buffer: u64,
     point: u8,
+    unit: Option<&'a str>,
 }
 
-impl UFixedDouble {
+impl<'a> UFixedDouble<'a> {
     pub fn parse(body: &str, length: usize, point: u8) -> Result<UFixedDouble> {
+
+
         // Do not forget the extra '.'
         let buffer = body.get(1..length + 2).ok_or(Error::InvalidFormat)?;
         let (upper, lower) = buffer.split_at(length - point as usize);
@@ -97,11 +102,49 @@ impl UFixedDouble {
         Ok(UFixedDouble {
             buffer: upper * 10u64.pow(u32::from(point)) + lower,
             point,
+            unit: None
         })
     }
+
+    pub fn parse2(body: &'a str, _l: usize, _p: u8) -> Result<UFixedDouble> {
+
+        let body = body.trim_start_matches('(').trim_end_matches(')');
+
+        let (val, unit) = body.split_once('*').map(|(v, u)| (v, Some(u)))
+            .unwrap_or((body, None));
+
+
+        let decimal_point = val.find('.');
+
+
+        let (buffer, point) = if let Some(p) = decimal_point {
+
+            let (real, dec) = val.split_at(p);
+            let ndec = dec.len();
+
+            let r = real.parse::<u64>().map_err(|_| Error::InvalidFormat)?;
+            let d = dec.parse::<u64>().map_err(|_| Error::InvalidFormat)?;
+
+            (r * 10u64.pow(ndec as u32) + d, ndec)
+
+        } else {
+            (val.parse().map_err(|_| Error::InvalidFormat)?, 0)
+        };
+
+
+        assert_eq!(_p, point as u8);
+
+        Ok(UFixedDouble {
+            buffer,
+            point: point as u8,
+            unit
+        })
+
+    }
+
 }
 
-impl core::convert::From<&UFixedDouble> for f64 {
+impl core::convert::From<&UFixedDouble<'_>> for f64 {
     fn from(other: &UFixedDouble) -> Self {
         other.buffer as f64 / (10u64.pow(u32::from(other.point)) as f64)
     }

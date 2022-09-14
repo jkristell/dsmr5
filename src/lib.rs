@@ -83,6 +83,11 @@ impl<'a> Telegram<'a> {
     pub fn objects(&self) -> impl core::iter::Iterator<Item = Result<OBIS<'a>>> {
         self.object_buffer.lines().map(OBIS::parse)
     }
+
+    pub fn objects_unwraped(&self) -> impl core::iter::Iterator<Item = OBIS<'a>> {
+        self.object_buffer.lines().map(|l| OBIS::parse(l).unwrap())
+    }
+
 }
 
 #[cfg(test)]
