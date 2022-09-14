@@ -41,6 +41,13 @@ pub enum OBIS<'a> {
     /// Check what your meter emits in practice.
     TariffIndicator(OctetString<'a>),
     PowerDelivered(UFixedDouble),
+
+    TotalDelivered(UFixedDouble),
+    TotalReceived(UFixedDouble),
+    TotalReactiveDelived(UFixedDouble),
+    TotalReactiveReceived(UFixedDouble),
+
+
     PowerReceived(UFixedDouble),
     PowerFailures(UFixedInteger),
     LongPowerFailures(UFixedInteger),
@@ -150,9 +157,26 @@ impl<'a> OBIS<'a> {
                 Line3,
                 UFixedDouble::parse(body, 5, 3)?,
             )),
+
+            "1-0:1.8.0" => Ok(OBIS::TotalDelivered(
+                UFixedDouble::parse(body, 11, 3)?,
+            )),
+            "1-0:2.8.0" => Ok(OBIS::TotalReceived(
+                UFixedDouble::parse(body, 11, 3)?,
+            )),
+            "1-0:3.8.0" => Ok(OBIS::TotalReactiveDelived(
+                UFixedDouble::parse(body, 11, 3)?,
+            )),
+
+                "1-0:4.8.0" => Ok(OBIS::TotalReactiveReceived(
+                UFixedDouble::parse(body, 11, 3)?,
+            )),
+
+
             _ => {
                 if reference.len() != 10 || reference.get(..2).ok_or(Error::InvalidFormat)? != "0-"
                 {
+                    dbg!(reference);
                     return Err(Error::UnknownObis);
                 }
 

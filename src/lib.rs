@@ -1,6 +1,5 @@
 //! A no-std Rust implementation of the [DSMR5 standard](https://www.netbeheernederland.nl/_upload/Files/Slimme_meter_15_a727fce1f1.pdf) (Dutch Smart Meter Requirements).
 
-#![no_std]
 
 pub mod state;
 pub mod types;
@@ -16,6 +15,7 @@ pub enum Error {
     InvalidFormat,
     InvalidChecksum,
     UnknownObis,
+
 }
 
 pub type Result<T> = core::result::Result<T, Error>;
