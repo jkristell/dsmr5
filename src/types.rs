@@ -113,24 +113,16 @@ impl<'a> UFixedDouble<'a> {
         let (val, unit) = body.split_once('*').map(|(v, u)| (v, Some(u)))
             .unwrap_or((body, None));
 
+        let (buffer, point) = if let Some((real, dec)) = val.split_once('.') {
 
-        let decimal_point = val.find('.');
-
-
-        let (buffer, point) = if let Some(p) = decimal_point {
-
-            let (real, dec) = val.split_at(p);
             let ndec = dec.len();
-
             let r = real.parse::<u64>().map_err(|_| Error::InvalidFormat)?;
             let d = dec.parse::<u64>().map_err(|_| Error::InvalidFormat)?;
 
             (r * 10u64.pow(ndec as u32) + d, ndec)
-
         } else {
             (val.parse().map_err(|_| Error::InvalidFormat)?, 0)
         };
-
 
         assert_eq!(_p, point as u8);
 
@@ -139,9 +131,7 @@ impl<'a> UFixedDouble<'a> {
             point: point as u8,
             unit
         })
-
     }
-
 }
 
 impl core::convert::From<&UFixedDouble<'_>> for f64 {

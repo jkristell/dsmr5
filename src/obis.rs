@@ -44,9 +44,14 @@ pub enum OBIS<'a> {
 
     TotalDelivered(UFixedDouble<'a>),
     TotalReceived(UFixedDouble<'a>),
-    TotalReactiveDelived(UFixedDouble<'a>),
-    TotalReactiveReceived(UFixedDouble<'a>),
+    MeterReadingReactiveOut(UFixedDouble<'a>),
+    MeterReadingReactiveIn(UFixedDouble<'a>),
 
+    TotalReactivePowerOut(UFixedDouble<'a>),
+    TotalReactivePowerIn(UFixedDouble<'a>),
+
+    ReactivePowerOut(Line, UFixedDouble<'a>),
+    ReactivePowerIn(Line, UFixedDouble<'a>),
 
     PowerReceived(UFixedDouble<'a>),
     PowerFailures(UFixedInteger),
@@ -81,23 +86,23 @@ impl<'a> OBIS<'a> {
             )?)),
             "1-0:1.8.1" => Ok(OBIS::MeterReadingTo(
                 Tariff1,
-                UFixedDouble::parse(body, 9, 3)?,
+                UFixedDouble::parse2(body, 9, 3)?,
             )),
             "1-0:1.8.2" => Ok(OBIS::MeterReadingTo(
                 Tariff2,
-                UFixedDouble::parse(body, 9, 3)?,
+                UFixedDouble::parse2(body, 9, 3)?,
             )),
             "1-0:2.8.1" => Ok(OBIS::MeterReadingBy(
                 Tariff1,
-                UFixedDouble::parse(body, 9, 3)?,
+                UFixedDouble::parse2(body, 9, 3)?,
             )),
             "1-0:2.8.2" => Ok(OBIS::MeterReadingBy(
                 Tariff2,
-                UFixedDouble::parse(body, 9, 3)?,
+                UFixedDouble::parse2(body, 9, 3)?,
             )),
             "0-0:96.14.0" => Ok(OBIS::TariffIndicator::<'a>(OctetString::parse(body, 4)?)),
-            "1-0:1.7.0" => Ok(OBIS::PowerDelivered(UFixedDouble::parse(body, 7, 3)?)),
-            "1-0:2.7.0" => Ok(OBIS::PowerReceived(UFixedDouble::parse(body, 5, 3)?)),
+            "1-0:1.7.0" => Ok(OBIS::PowerDelivered(UFixedDouble::parse2(body, 5, 3)?)),
+            "1-0:2.7.0" => Ok(OBIS::PowerReceived(UFixedDouble::parse2(body, 5, 3)?)),
             "0-0:96.7.21" => Ok(OBIS::PowerFailures(UFixedInteger::parse(body, 5)?)),
             "0-0:96.7.9" => Ok(OBIS::LongPowerFailures(UFixedInteger::parse(body, 5)?)),
             "1-0:99.97.0" => Ok(OBIS::PowerFailureEventLog), // TODO
@@ -123,55 +128,63 @@ impl<'a> OBIS<'a> {
             )),
             "1-0:32.7.0" => Ok(OBIS::InstantaneousVoltage(
                 Line1,
-                UFixedDouble::parse(body, 4, 1)?,
+                UFixedDouble::parse2(body, 4, 1)?,
             )),
             "1-0:52.7.0" => Ok(OBIS::InstantaneousVoltage(
                 Line2,
-                UFixedDouble::parse(body, 4, 1)?,
+                UFixedDouble::parse2(body, 4, 1)?,
             )),
             "1-0:72.7.0" => Ok(OBIS::InstantaneousVoltage(
                 Line3,
-                UFixedDouble::parse(body, 4, 1)?,
+                UFixedDouble::parse2(body, 4, 1)?,
             )),
             "1-0:21.7.0" => Ok(OBIS::InstantaneousActivePowerPlus(
                 Line1,
-                UFixedDouble::parse(body, 5, 3)?,
+                UFixedDouble::parse2(body, 5, 3)?,
             )),
             "1-0:41.7.0" => Ok(OBIS::InstantaneousActivePowerPlus(
                 Line2,
-                UFixedDouble::parse(body, 5, 3)?,
+                UFixedDouble::parse2(body, 5, 3)?,
             )),
             "1-0:61.7.0" => Ok(OBIS::InstantaneousActivePowerPlus(
                 Line3,
-                UFixedDouble::parse(body, 5, 3)?,
+                UFixedDouble::parse2(body, 5, 3)?,
             )),
             "1-0:22.7.0" => Ok(OBIS::InstantaneousActivePowerNeg(
                 Line1,
-                UFixedDouble::parse(body, 5, 3)?,
+                UFixedDouble::parse2(body, 5, 3)?,
             )),
             "1-0:42.7.0" => Ok(OBIS::InstantaneousActivePowerNeg(
                 Line2,
-                UFixedDouble::parse(body, 5, 3)?,
+                UFixedDouble::parse2(body, 5, 3)?,
             )),
             "1-0:62.7.0" => Ok(OBIS::InstantaneousActivePowerNeg(
                 Line3,
-                UFixedDouble::parse(body, 5, 3)?,
+                UFixedDouble::parse2(body, 5, 3)?,
             )),
 
             "1-0:1.8.0" => Ok(OBIS::TotalDelivered(
-                UFixedDouble::parse(body, 11, 3)?,
+                UFixedDouble::parse2(body, 11, 3)?,
             )),
             "1-0:2.8.0" => Ok(OBIS::TotalReceived(
-                UFixedDouble::parse(body, 11, 3)?,
+                UFixedDouble::parse2(body, 11, 3)?,
             )),
-            "1-0:3.8.0" => Ok(OBIS::TotalReactiveDelived(
-                UFixedDouble::parse(body, 11, 3)?,
-            )),
-
-                "1-0:4.8.0" => Ok(OBIS::TotalReactiveReceived(
-                UFixedDouble::parse(body, 11, 3)?,
+            "1-0:3.8.0" => Ok(OBIS::MeterReadingReactiveOut(
+                UFixedDouble::parse2(body, 11, 3)?,
             )),
 
+                "1-0:4.8.0" => Ok(OBIS::MeterReadingReactiveIn(
+                UFixedDouble::parse2(body, 11, 3)?,
+            )),
+
+            "1-0:3.7.0" => Ok(OBIS::TotalReactivePowerOut(UFixedDouble::parse2(body, 4, 3)?)),
+            "1-0:4.7.0" => Ok(OBIS::TotalReactivePowerIn(UFixedDouble::parse2(body, 4, 3)?)),
+            "1-0:23.7.0" => Ok(OBIS::ReactivePowerOut(Line1, UFixedDouble::parse2(body,  4, 3)?)),
+            "1-0:24.7.0" => Ok(OBIS::ReactivePowerIn(Line1, UFixedDouble::parse2(body,  4, 3)? )),
+            "1-0:43.7.0" => Ok(OBIS::ReactivePowerOut(Line2, UFixedDouble::parse2(body,  4, 3)? )),
+            "1-0:44.7.0" => Ok(OBIS::ReactivePowerIn(Line2, UFixedDouble::parse2(body,  4, 3)? )),
+            "1-0:63.7.0" => Ok(OBIS::ReactivePowerIn(Line3, UFixedDouble::parse2(body,  4, 3)? )),
+            "1-0:64.7.0" => Ok(OBIS::ReactivePowerIn(Line3, UFixedDouble::parse2(body,  4, 3)? )),
 
             _ => {
                 if reference.len() != 10 || reference.get(..2).ok_or(Error::InvalidFormat)? != "0-"
@@ -212,7 +225,7 @@ impl<'a> OBIS<'a> {
                         Ok(OBIS::SlaveMeterReading(
                             channel,
                             TST::parse(time)?,
-                            UFixedDouble::parse(measurement, 8, 9 - period as u8)?,
+                            UFixedDouble::parse2(measurement, 8, 9 - period as u8)?,
                         ))
                     }
                     _ => Err(Error::UnknownObis),
